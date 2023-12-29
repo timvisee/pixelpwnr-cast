@@ -79,7 +79,7 @@ cargo build --release
 ## Help
 
 ```text
-pixelpwnr-cast --help
+$ pixelpwnr-cast --help
 
 Insanely fast pixelflut client for casting your screen
 
