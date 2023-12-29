@@ -16,13 +16,7 @@ pub struct Arguments {
     host: String,
 
     /// Screen number (X11 ID)
-    #[arg(
-        short,
-        long,
-        value_name = "SCREEN_ID",
-        required = true,
-        default_value_t = 0
-    )]
+    #[arg(short, long, value_name = "SCREEN_ID", default_value_t = 0)]
     screen: usize,
 
     /// Draw width [default: screen width]
