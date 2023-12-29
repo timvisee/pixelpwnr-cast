@@ -1,15 +1,14 @@
 [package]
-name = "pixelpwnr-stream"
+name = "pixelpwnr-cast"
 version = "0.1.0"
 edition = "2021"
-
 authors = ["Tim Visée <timvisee@gmail.com>"]
 license = "GPL-3.0"
 readme = "README.md"
-homepage = "https://timvisee.com/projects/pixelpwnr-stream"
-repository = "https://github.com/timvisee/pixelpwnr-stream"
-description = "Insanely fast pixelflut client for streaming your screen"
-keywords = ["pixelflut", "pixelpwnr", "stream"]
+homepage = "https://timvisee.com/projects/pixelpwnr-cast"
+repository = "https://github.com/timvisee/pixelpwnr-cast"
+description = "Insanely fast pixelflut client for casting your screen"
+keywords = ["pixelflut", "pixelpwnr", "screencast"]
 categories = [
     "command-line-utilities",
 ]

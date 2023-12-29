@@ -166,7 +166,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pixelpwnr-stream"
+name = "pixelpwnr-cast"
 version = "0.1.0"
 dependencies = [
  "bufstream",
