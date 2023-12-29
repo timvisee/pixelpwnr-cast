@@ -111,7 +111,7 @@ fn painter(
     rows: Range<u16>,
 ) {
     let binary = args.binary();
-    let flush = !args.no_flush();
+    let flush = args.flush();
     let alpha = args.alpha();
 
     let mut stream = TcpStream::connect(args.host()).expect("failed to connect");
