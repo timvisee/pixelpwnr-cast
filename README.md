@@ -3,9 +3,9 @@
 A quick [pixelflut][pixelflut] ([video][pixelflut-video]) client in
 [Rust][rust] for use at [37C3][37C3], that streams your screen to pixelflut panels.
 
-For a high performance pixelflut client and server implementation, see:  
-[→ pixelpwnr (client)][pixelpwnr]
-[→ pixelpwnr-server (server)][pixelpwnr-server]
+For a high performance pixelflut client and server implementation, see:
+- [pixelpwnr (client)][pixelpwnr]
+- [pixelpwnr-server (server)][pixelpwnr-server]
 
 ## Features
 
@@ -113,7 +113,7 @@ This project is released under the GNU GPL-3.0 license.
 Check out the [LICENSE](LICENSE) file for more information.
 
 
-[34C3]: https://events.ccc.de/congress/2023/infos/startpage.html
+[37C3]: https://events.ccc.de/congress/2023/infos/startpage.html
 [pixelflut]: https://cccgoe.de/wiki/Pixelflut
 [pixelflut-video]: https://vimeo.com/92827556/
 [pixelpwnr]: https://github.com/timvisee/pixelpwnr
