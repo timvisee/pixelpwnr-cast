@@ -1,0 +1,10 @@
+[package]
+name = "pixelpwnr-stream"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+captrs = "0.3"
+
+[profile.release]
+lto = true
