@@ -82,8 +82,10 @@ fn capturer(
 ) {
     loop {
         {
-            // Write screenshot to new frame
+            // Capture new frame
             cap.capture_store_frame().expect("failed to capture frame");
+
+            // Write screenshot to new frame
             let mut new_frame = frames.1.write().unwrap();
             new_frame.copy_from_slice(cap.get_stored_frame().unwrap());
 
