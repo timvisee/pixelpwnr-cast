@@ -1,13 +1,5 @@
 pub mod args;
 
-// The default buffer size for reading the client stream.
-// - Big enough so we don't have to expand
-// - Small enough to not take up to much memory
-const CMD_READ_BUFFER_SIZE: usize = 32;
-
-// The response format of the screen size from a pixelflut server.
-const PIX_SERVER_SIZE_REGEX: &str = r"^(?i)\s*SIZE\s+([[:digit:]]+)\s+([[:digit:]]+)\s*$";
-
 use std::{
     io::{BufRead, Error, ErrorKind, Write},
     mem,
@@ -21,6 +13,17 @@ use args::ArgHandler;
 use bufstream::BufStream;
 use captrs::{Bgr8, Capturer};
 use regex::Regex;
+
+// Two frame buffers.
+type Frames = Arc<(Arc<RwLock<Vec<Bgr8>>>, Arc<RwLock<Vec<Bgr8>>>)>;
+
+// The default buffer size for reading the client stream.
+// - Big enough so we don't have to expand
+// - Small enough to not take up to much memory
+const CMD_READ_BUFFER_SIZE: usize = 32;
+
+// The response format of the screen size from a pixelflut server.
+const PIX_SERVER_SIZE_REGEX: &str = r"^(?i)\s*SIZE\s+([[:digit:]]+)\s+([[:digit:]]+)\s*$";
 
 fn main() {
     let args = Arc::new(ArgHandler::parse());
@@ -75,12 +78,7 @@ fn main() {
     capturer(cap, frames, vsync, args.frame_buffering());
 }
 
-fn capturer(
-    mut cap: Capturer,
-    frames: Arc<(Arc<RwLock<Vec<Bgr8>>>, Arc<RwLock<Vec<Bgr8>>>)>,
-    vsync: Arc<Barrier>,
-    frame_buffering: bool,
-) {
+fn capturer(mut cap: Capturer, frames: Frames, vsync: Arc<Barrier>, frame_buffering: bool) {
     loop {
         // Capture new frame
         cap.capture_store_frame().expect("failed to capture frame");
@@ -106,7 +104,7 @@ fn capturer(
 
 fn painter(
     args: Arc<ArgHandler>,
-    frame: Arc<(Arc<RwLock<Vec<Bgr8>>>, Arc<RwLock<Vec<Bgr8>>>)>,
+    frame: Frames,
     vsync: Arc<Barrier>,
     (factorx, factory): (f32, f32),
     outx: u16,
