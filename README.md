@@ -83,23 +83,24 @@ pixelpwnr-cast --help
 
 Insanely fast pixelflut client for casting your screen
 
-Usage: pixelpwnr-cast [OPTIONS] --screen <SCREEN_ID> <HOST>
+Usage: pixelpwnr-cast [OPTIONS] <HOST>
 
 Arguments:
   <HOST>  The host to pwn "host:port"
 
 Options:
-      --help                Show this help
-  -s, --screen <SCREEN_ID>  Screen number (X11 ID) [default: 0]
-  -w, --width <PIXELS>      Draw width [default: screen width]
-  -h, --height <PIXELS>     Draw height [default: screen height]
-  -x <PIXELS>               Draw X offset [default: 0]
-  -y <PIXELS>               Draw Y offset [default: 0]
-  -c, --count <COUNT>       Number of concurrent threads [default: number of CPUs]
-  -b, --binary              Use binary mode to set pixels (`PB` protocol extension) [default: off]
-  -n, --no-flush            Do not flush socket after each pixel [default: on]
-  -f, --frame-buffering     Whether to use frame buffering
-  -V, --version             Print version
+      --help                       Show this help
+  -s, --screen <SCREEN_ID>         Screen number (X11 ID) [default: 0]
+  -w, --width <PIXELS>             Draw width [default: screen width]
+  -h, --height <PIXELS>            Draw height [default: screen height]
+  -x <PIXELS>                      Draw X offset [default: 0]
+  -y <PIXELS>                      Draw Y offset [default: 0]
+  -a, --alpha <ALPHA>              Alpha channel [0, 255] [default: 255] [default: 255]
+  -c, --count <COUNT>              Number of concurrent threads [default: number of CPUs]
+  -b, --binary                     Use binary mode to set pixels (`PB` protocol extension) [default: off]
+  -f, --flush <ENABLED>            Flush socket after each pixel [default: true] [default: true] [possible values: true, false]
+  -f, --frame-buffering <ENABLED>  Whether to use frame buffering [default: true] [possible values: true, false]
+  -V, --version                    Print version
 ```
 
 ## Relevant projects
