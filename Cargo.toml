@@ -3,8 +3,23 @@ name = "pixelpwnr-stream"
 version = "0.1.0"
 edition = "2021"
 
+authors = ["Tim Visée <timvisee@gmail.com>"]
+license = "GPL-3.0"
+readme = "README.md"
+homepage = "https://timvisee.com/projects/pixelpwnr-stream"
+repository = "https://github.com/timvisee/pixelpwnr-stream"
+description = "Insanely fast pixelflut client for streaming your screen"
+keywords = ["pixelflut", "pixelpwnr", "stream"]
+categories = [
+    "command-line-utilities",
+]
+
 [dependencies]
+bufstream = "0.1"
 captrs = "0.3"
+clap = { version = "4.4", features = [ "derive" ] }
+num_cpus = "1.13.1"
+regex = "1.5"
 
 [profile.release]
 lto = true
