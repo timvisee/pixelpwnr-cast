@@ -25,7 +25,7 @@ use regex::Regex;
 fn main() {
     let args = Arc::new(ArgHandler::parse());
 
-    println!("Opening screen capturer...");
+    println!("Starting screen capture");
 
     let cap = Capturer::new(args.screen()).expect("failed to create capturer");
 
@@ -67,7 +67,7 @@ fn main() {
         });
     }
 
-    println!("Starting... (use CTRL+C to stop)");
+    println!("Streaming now... (use CTRL+C to stop)");
 
     capturer(cap, frame, vsync);
 }
@@ -100,6 +100,7 @@ fn painter(
     let mut stream = TcpStream::connect(args.host()).expect("failed to connect");
 
     loop {
+        // Wait for other painters and frame to be captured
         vsync.wait();
 
         let frame = frame.read().unwrap();
@@ -132,7 +133,7 @@ fn painter(
                         ])
                         .expect("failed to write pixel");
                 } else {
-                    let msg = format!("PX {x} {y} {:02X}{:02X}{:02X}", pix.r, pix.g, pix.b);
+                    let msg = format!("PX {x} {y} {:02X}{:02X}{:02X}\n", pix.r, pix.g, pix.b);
                     stream
                         .write_all(msg.as_bytes())
                         .expect("failed to write pixel");
