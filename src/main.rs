@@ -37,7 +37,6 @@ fn main() {
         gather_host_facts(&args).expect("Failed to gather facts about pixelflut server");
 
     let (gx, gy) = cap.geometry();
-
     let (outx, outy) = args.size(Some(screen_size));
 
     let factorx = gx as f32 / outx as f32;
@@ -57,8 +56,8 @@ fn main() {
         let frames = frames.clone();
         let vsync = vsync.clone();
 
-        let starty = (outy as f32 / thread_count as f32) as u16 * i;
-        let endy = (outy as f32 / thread_count as f32) as u16 * (i + 1);
+        let row_start = ((i as f32 / thread_count as f32) * outy as f32) as u16;
+        let row_end = (((i + 1) as f32 / thread_count as f32) * outy as f32) as u16;
 
         thread::spawn(move || {
             painter(
@@ -68,7 +67,7 @@ fn main() {
                 (factorx, factory),
                 outx,
                 gx,
-                starty..endy,
+                row_start..row_end,
             );
         });
     }
@@ -151,7 +150,7 @@ fn painter(
                         ])
                         .expect("failed to write pixel");
                 } else {
-                    let msg = if alpha == 255 {
+                    let msg = if alpha == u8::MAX {
                         format!("PX {x} {y} {:02X}{:02X}{:02X}\n", pix.r, pix.g, pix.b)
                     } else {
                         format!(
