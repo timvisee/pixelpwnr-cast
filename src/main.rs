@@ -48,7 +48,7 @@ fn main() {
 
     for i in 0..thread_count as u16 {
         let args = args.clone();
-        let shared_frame = frame.clone();
+        let frame = frame.clone();
         let vsync = vsync.clone();
 
         let starty = (outy as f32 / thread_count as f32) as u16 * i;
@@ -57,10 +57,9 @@ fn main() {
         thread::spawn(move || {
             painter(
                 args,
-                shared_frame,
+                frame,
                 vsync,
-                factorx,
-                factory,
+                (factorx, factory),
                 outx,
                 gx,
                 starty..endy,
@@ -90,12 +89,14 @@ fn painter(
     args: Arc<ArgHandler>,
     frame: Arc<RwLock<Vec<Bgr8>>>,
     vsync: Arc<Barrier>,
-    factorx: f32,
-    factory: f32,
+    (factorx, factory): (f32, f32),
     outx: u16,
     gx: u32,
     y_range: Range<u16>,
 ) {
+    let binary = args.binary();
+    let flush = !args.no_flush();
+
     let mut stream = TcpStream::connect(args.host()).expect("failed to connect");
 
     loop {
@@ -114,20 +115,33 @@ fn painter(
                 let x = x + args.offset().0;
                 let y = y + args.offset().1;
 
-                let msg = &[
-                    b'P',
-                    b'B',
-                    x as u8,
-                    (x >> 8) as u8,
-                    y as u8,
-                    (y >> 8) as u8,
-                    pix.r,
-                    pix.g,
-                    pix.b,
-                    255,
-                ];
+                // Send pixel in binary or text mode
+                if binary {
+                    stream
+                        .write_all(&[
+                            b'P',
+                            b'B',
+                            x as u8,
+                            (x >> 8) as u8,
+                            y as u8,
+                            (y >> 8) as u8,
+                            pix.r,
+                            pix.g,
+                            pix.b,
+                            255,
+                        ])
+                        .expect("failed to write pixel");
+                } else {
+                    let msg = format!("PX {x} {y} {:02X}{:02X}{:02X}", pix.r, pix.g, pix.b);
+                    stream
+                        .write_all(msg.as_bytes())
+                        .expect("failed to write pixel");
+                }
 
-                stream.write_all(msg).expect("failed to write pixel");
+                // Flush stream
+                if flush {
+                    stream.flush().expect("failed to flush stream");
+                }
             }
         }
     }
