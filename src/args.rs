@@ -52,7 +52,7 @@ pub struct Arguments {
     no_flush: bool,
 
     /// Whether to use frame buffering.
-    #[arg(short, long, alias = "frame-buf", value_name = "ENABLED")]
+    #[arg(short, long, action = clap::ArgAction::Set, value_name = "ENABLED", default_value_t = true, alias = "frame-buf")]
     frame_buffering: bool,
 }
 

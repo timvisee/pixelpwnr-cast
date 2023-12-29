@@ -93,7 +93,7 @@ fn capturer(mut cap: Capturer, frames: Frames, vsync: Arc<Barrier>, frame_buffer
             mem::swap(&mut *new_frame, &mut *cur_frame);
         } else {
             // Write capture directly to current frame
-            let mut cur_frame = frames.1.write().unwrap();
+            let mut cur_frame = frames.0.write().unwrap();
             cur_frame.copy_from_slice(cap.get_stored_frame().unwrap());
         }
 
