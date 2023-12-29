@@ -50,6 +50,10 @@ pub struct Arguments {
     /// Do not flush socket after each pixel [default: on]
     #[arg(short, long)]
     no_flush: bool,
+
+    /// Whether to use frame buffering.
+    #[arg(short, long, alias = "frame-buf", value_name = "ENABLED")]
+    frame_buffering: bool,
 }
 
 /// CLI argument handler.
@@ -105,5 +109,10 @@ impl ArgHandler {
     /// Whether to prevent flushing after each pixel.
     pub fn no_flush(&self) -> bool {
         self.data.no_flush
+    }
+
+    /// Whether to use frame buffering.
+    pub fn frame_buffering(&self) -> bool {
+        self.data.frame_buffering
     }
 }

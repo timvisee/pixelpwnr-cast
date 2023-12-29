@@ -70,28 +70,33 @@ fn main() {
         });
     }
 
-    println!("Streaming now... (use CTRL+C to stop)");
+    println!("Casting now... (use CTRL+C to stop)");
 
-    capturer(cap, frames, vsync);
+    capturer(cap, frames, vsync, args.frame_buffering());
 }
 
 fn capturer(
     mut cap: Capturer,
     frames: Arc<(Arc<RwLock<Vec<Bgr8>>>, Arc<RwLock<Vec<Bgr8>>>)>,
     vsync: Arc<Barrier>,
+    frame_buffering: bool,
 ) {
     loop {
-        {
-            // Capture new frame
-            cap.capture_store_frame().expect("failed to capture frame");
+        // Capture new frame
+        cap.capture_store_frame().expect("failed to capture frame");
 
-            // Write screenshot to new frame
+        if frame_buffering {
+            // Write capture to new frame
             let mut new_frame = frames.1.write().unwrap();
             new_frame.copy_from_slice(cap.get_stored_frame().unwrap());
 
             // Swap new frame with current for upcoming paint
             let mut cur_frame = frames.0.write().unwrap();
             mem::swap(&mut *new_frame, &mut *cur_frame);
+        } else {
+            // Write capture directly to current frame
+            let mut cur_frame = frames.1.write().unwrap();
+            cur_frame.copy_from_slice(cap.get_stored_frame().unwrap());
         }
 
         // Synchronize with painters
