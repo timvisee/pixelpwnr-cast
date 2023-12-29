@@ -40,15 +40,18 @@ fn main() {
     let factorx = gx as f32 / outx as f32;
     let factory = gy as f32 / outy as f32;
 
-    let frame = vec![unsafe { mem::zeroed() }; gx as usize * gy as usize];
-    let frame = Arc::new(RwLock::new(frame));
+    let base_frame = vec![unsafe { mem::zeroed() }; gx as usize * gy as usize];
+    let cur_frame = Arc::new(RwLock::new(base_frame.clone()));
+    let next_frame = Arc::new(RwLock::new(base_frame));
+
+    let frames = Arc::new((cur_frame, next_frame));
 
     let thread_count = args.count();
     let vsync = Arc::new(Barrier::new(thread_count + 1));
 
     for i in 0..thread_count as u16 {
         let args = args.clone();
-        let frame = frame.clone();
+        let frames = frames.clone();
         let vsync = vsync.clone();
 
         let starty = (outy as f32 / thread_count as f32) as u16 * i;
@@ -57,7 +60,7 @@ fn main() {
         thread::spawn(move || {
             painter(
                 args,
-                frame,
+                frames,
                 vsync,
                 (factorx, factory),
                 outx,
@@ -69,16 +72,25 @@ fn main() {
 
     println!("Streaming now... (use CTRL+C to stop)");
 
-    capturer(cap, frame, vsync);
+    capturer(cap, frames, vsync);
 }
 
-fn capturer(mut cap: Capturer, shared_frame: Arc<RwLock<Vec<Bgr8>>>, vsync: Arc<Barrier>) {
+fn capturer(
+    mut cap: Capturer,
+    frames: Arc<(Arc<RwLock<Vec<Bgr8>>>, Arc<RwLock<Vec<Bgr8>>>)>,
+    vsync: Arc<Barrier>,
+) {
     loop {
-        cap.capture_store_frame().expect("failed to capture frame");
-        shared_frame
-            .write()
-            .unwrap()
-            .copy_from_slice(cap.get_stored_frame().unwrap());
+        {
+            // Write screenshot to new frame
+            let mut new_frame = frames.1.write().unwrap();
+            cap.capture_store_frame().expect("failed to capture frame");
+            new_frame.copy_from_slice(cap.get_stored_frame().unwrap());
+
+            // Swap new frame with current for upcoming paint
+            let mut cur_frame = frames.0.write().unwrap();
+            mem::swap(&mut *new_frame, &mut *cur_frame);
+        }
 
         // Synchronize with painters
         vsync.wait();
@@ -87,7 +99,7 @@ fn capturer(mut cap: Capturer, shared_frame: Arc<RwLock<Vec<Bgr8>>>, vsync: Arc<
 
 fn painter(
     args: Arc<ArgHandler>,
-    frame: Arc<RwLock<Vec<Bgr8>>>,
+    frame: Arc<(Arc<RwLock<Vec<Bgr8>>>, Arc<RwLock<Vec<Bgr8>>>)>,
     vsync: Arc<Barrier>,
     (factorx, factory): (f32, f32),
     outx: u16,
@@ -103,7 +115,7 @@ fn painter(
         // Wait for other painters and frame to be captured
         vsync.wait();
 
-        let frame = frame.read().unwrap();
+        let frame = frame.0.read().unwrap();
 
         for y in y_range.clone() {
             for x in 0..outx {
