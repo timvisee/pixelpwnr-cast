@@ -109,10 +109,11 @@ fn painter(
     (factorx, factory): (f32, f32),
     outx: u16,
     gx: u32,
-    y_range: Range<u16>,
+    rows: Range<u16>,
 ) {
     let binary = args.binary();
     let flush = !args.no_flush();
+    let alpha = args.alpha();
 
     let mut stream = TcpStream::connect(args.host()).expect("failed to connect");
 
@@ -122,7 +123,7 @@ fn painter(
 
         let frame = frame.0.read().unwrap();
 
-        for y in y_range.clone() {
+        for y in rows.clone() {
             for x in 0..outx {
                 let framex = (x as f32 * factorx) as u32;
                 let framey = (y as f32 * factory) as u32;
@@ -146,11 +147,18 @@ fn painter(
                             pix.r,
                             pix.g,
                             pix.b,
-                            255,
+                            alpha,
                         ])
                         .expect("failed to write pixel");
                 } else {
-                    let msg = format!("PX {x} {y} {:02X}{:02X}{:02X}\n", pix.r, pix.g, pix.b);
+                    let msg = if alpha == 255 {
+                        format!("PX {x} {y} {:02X}{:02X}{:02X}\n", pix.r, pix.g, pix.b)
+                    } else {
+                        format!(
+                            "PX {x} {y} {:02X}{:02X}{:02X}{alpha:02X}\n",
+                            pix.r, pix.g, pix.b,
+                        )
+                    };
                     stream
                         .write_all(msg.as_bytes())
                         .expect("failed to write pixel");

@@ -33,6 +33,10 @@ pub struct Arguments {
     #[arg(short, value_name = "PIXELS", default_value_t = 0)]
     y: u16,
 
+    /// Alpha channel [0, 255] [default: 255]
+    #[arg(short, long, value_name = "ALPHA", default_value_t = 255)]
+    alpha: u8,
+
     /// Number of concurrent threads [default: number of CPUs]
     #[arg(short, long, aliases = ["thread", "threads"])]
     count: Option<usize>,
@@ -93,6 +97,11 @@ impl ArgHandler {
     /// Get the image offset.
     pub fn offset(&self) -> (u16, u16) {
         (self.data.x, self.data.y)
+    }
+
+    /// Get the alpha channel value.
+    pub fn alpha(&self) -> u8 {
+        self.data.alpha
     }
 
     /// Whether to use binary mode.
