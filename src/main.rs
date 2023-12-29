@@ -36,13 +36,13 @@ fn main() {
     let screen_size =
         gather_host_facts(&args).expect("Failed to gather facts about pixelflut server");
 
-    let (gx, gy) = cap.geometry();
-    let (outx, outy) = args.size(Some(screen_size));
+    let (cap_width, cap_height) = cap.geometry();
+    let (server_width, server_height) = args.size(Some(screen_size));
 
-    let factorx = gx as f32 / outx as f32;
-    let factory = gy as f32 / outy as f32;
+    let factor_x = cap_width as f32 / server_width as f32;
+    let factor_y = cap_height as f32 / server_height as f32;
 
-    let base_frame = vec![unsafe { mem::zeroed() }; gx as usize * gy as usize];
+    let base_frame = vec![unsafe { mem::zeroed() }; cap_width as usize * cap_height as usize];
     let cur_frame = Arc::new(RwLock::new(base_frame.clone()));
     let next_frame = Arc::new(RwLock::new(base_frame));
 
@@ -56,17 +56,17 @@ fn main() {
         let frames = frames.clone();
         let vsync = vsync.clone();
 
-        let row_start = ((i as f32 / thread_count as f32) * outy as f32) as u16;
-        let row_end = (((i + 1) as f32 / thread_count as f32) * outy as f32) as u16;
+        let row_start = ((i as f32 / thread_count as f32) * server_height as f32) as u16;
+        let row_end = (((i + 1) as f32 / thread_count as f32) * server_height as f32) as u16;
 
         thread::spawn(move || {
             painter(
                 args,
                 frames,
                 vsync,
-                (factorx, factory),
-                outx,
-                gx,
+                (factor_x, factor_y),
+                cap_width,
+                server_width,
                 row_start..row_end,
             );
         });
@@ -105,9 +105,9 @@ fn painter(
     args: Arc<ArgHandler>,
     frame: Frames,
     vsync: Arc<Barrier>,
-    (factorx, factory): (f32, f32),
-    outx: u16,
-    gx: u32,
+    (factor_x, factor_y): (f32, f32),
+    cap_width: u32,
+    server_width: u16,
     rows: Range<u16>,
 ) {
     let binary = args.binary();
@@ -123,13 +123,14 @@ fn painter(
         let frame = frame.0.read().unwrap();
 
         for y in rows.clone() {
-            for x in 0..outx {
-                let framex = (x as f32 * factorx) as u32;
-                let framey = (y as f32 * factory) as u32;
-                let pos = framey * gx + framex;
+            for x in 0..server_width {
+                // Get current pixel from frame
+                let frame_x = (x as f32 * factor_x) as u32;
+                let frame_y = (y as f32 * factor_y) as u32;
+                let frame_pos = frame_y * cap_width + frame_x;
+                let pix = unsafe { frame.get_unchecked(frame_pos as usize) };
 
-                let pix = frame[pos as usize];
-
+                // Pixel position on server
                 let x = x + args.offset().0;
                 let y = y + args.offset().1;
 
